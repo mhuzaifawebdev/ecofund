@@ -3,7 +3,7 @@ import { Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="relative z-10 bg-[#14433C] bg-opacity-90 backdrop-blur-sm mt-16">
+    <footer className="relative z-10 bg-[#14433C] bg-opacity-90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-3 gap-8">
           {/* Company Info */}

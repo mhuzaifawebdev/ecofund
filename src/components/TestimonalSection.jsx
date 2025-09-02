@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 const TestimonialSection = () => {
@@ -168,9 +169,11 @@ const TestimonialSection = () => {
             <p className="text-lg text-white/90 mb-8">
               Check if your home qualifies today — it's fast, free & secure
             </p>
-            <button className="bg-[#14433C] hover:bg-[#14433C]/90 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 text-lg shadow-xl hover:shadow-[#14433C]/25 transform hover:scale-105 border border-[#FFEA00]/30" >
-              Check Your Eligibility Now
-            </button>
+            <Link href="/eligibility">
+              <button className="bg-[#14433C] hover:bg-[#14433C]/90 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 text-lg shadow-xl hover:shadow-[#14433C]/25 transform hover:scale-105 border border-[#FFEA00]/30" >
+                Check Your Eligibility Now
+              </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -18,15 +18,15 @@ const Header = () => {
            <Link href="/how-it-works" className="text-white hover:text-orange-300 transition-colors font-medium">
             How It Works?
           </Link>
-          <span className="text-white">|</span>
-          <Link href="/contact" className="text-white hover:text-orange-300 transition-colors font-medium">
+          {/* <span className="text-white">|</span> */}
+          {/* <Link href="/contact" className="text-white hover:text-orange-300 transition-colors font-medium">
             Contact Us
           </Link>
           <span className="text-white">|</span>
           <Link href="/faqs" className="text-white hover:text-orange-300 transition-colors font-medium">
             FAQS
           </Link>
-          <span className="text-white">|</span>
+          <span className="text-white">|</span> */}
          
         </div>
 

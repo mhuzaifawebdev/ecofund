@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { BadgeCheck } from 'lucide-react';
 
 const HeroSection = () => {
@@ -127,9 +128,11 @@ const HeroSection = () => {
                 </p>
                 <p className="text-white/90 text-sm">Quick eligibility check</p>
               </div>
-              <button className="w-full bg-[#14433C] text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 text-lg shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105">
-                Check If You Qualify
-              </button>
+              <Link href="/eligibility">
+                <button className="w-full bg-[#14433C] text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 text-lg shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105">
+                  Check If You Qualify
+                </button>
+              </Link>
             </div>
           </div>
         </div>

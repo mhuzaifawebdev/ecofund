@@ -39,7 +39,7 @@ export default function HowItWorks() {
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-center text-[#14433C] mb-12 md:mb-16">
+        <h1 className="text-4xl md:text-5xl font-bold text-center text-[#ffffff] mb-12 md:mb-16">
           How It Works?
         </h1>
         

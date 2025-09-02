@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Check, Shield, Zap, Sun } from 'lucide-react';
 
 const CtaSection = () => {
@@ -78,9 +79,11 @@ const CtaSection = () => {
             <div className="backdrop-blur-lg bg-white/10 rounded-2xl p-6 sm:p-8 border border-white/20 shadow-2xl">
               {/* CTA Button */}
               <div className="text-center mb-6">
-                <button className="w-full bg-[#14433C] text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 text-lg sm:text-xl shadow-xl hover:shadow-green-500/25 transform hover:scale-105">
-                  Start Your Application Today
-                </button>
+                <Link href="/eligibility">
+                  <button className="w-full bg-[#14433C] text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 text-lg sm:text-xl shadow-xl hover:shadow-green-500/25 transform hover:scale-105">
+                    Start Your Application Today
+                  </button>
+                </Link>
               </div>
 
               {/* Quick Info */}
