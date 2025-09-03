@@ -109,7 +109,7 @@ const HeroSection = () => {
                 <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 shadow-lg">
                       <BadgeCheck className="w-6 h-6 text-[#FFEA00]" />
                 </div>
-                <p className="text-white font-medium">Your property has Old heating system</p>
+                <p className="text-white font-medium">Your property is poorly insulated & has old heating system</p>
               </div>
 
               <div className="flex items-start space-x-4 p-3  bg-white/10 rounded-xl border border-white/20">
