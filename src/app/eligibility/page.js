@@ -4,6 +4,65 @@ import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+// Reusable message component for form feedback
+const FormMessage = ({ type, message }) => {
+  if (!message) return null;
+  
+  const styles = {
+    error: "bg-red-500/20 border-red-500",
+    success: "bg-green-500/20 border-green-500",
+    warning: "bg-yellow-500/20 border-yellow-500"
+  };
+  
+  return (
+    <div className={`mt-4 p-3 ${styles[type]} border rounded-lg`}>
+      <p className="text-white text-sm font-medium">
+        {message}
+      </p>
+    </div>
+  );
+};
+
+// Reusable select field component
+const FormSelect = ({ label, name, options, value, onChange, error }) => (
+  <div className="space-y-2">
+    <label className="text-white font-medium">{label}</label>
+    <div className="relative">
+      <select 
+        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-white border-2 ${error ? 'border-red-500' : 'border-transparent'}`}
+        onChange={(e) => onChange(name, e.target.value)}
+        value={value}
+        aria-invalid={error ? "true" : "false"}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
+      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#14433C] w-5 h-5 pointer-events-none" />
+      {error && <p className="text-red-300 text-sm mt-1">{error}</p>}
+    </div>
+  </div>
+);
+
+// Reusable input field component
+const FormInput = ({ label, id, type, placeholder, value, onChange, error }) => (
+  <div className="space-y-2">
+    <label htmlFor={id} className="text-white font-medium">{label}</label>
+    <div className="relative">
+      <input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg focus:outline-none focus:ring-2 focus:ring-white border-2 ${error ? 'border-red-500' : 'border-transparent'}`}
+        value={value}
+        onChange={(e) => onChange(id, e.target.value)}
+        aria-invalid={error ? "true" : "false"}
+      />
+      {error && <p className="text-red-300 text-sm mt-1">{error}</p>}
+    </div>
+  </div>
+);
+
 const Form = () => {
   const router = useRouter();
   
@@ -58,7 +117,6 @@ const Form = () => {
 
   const handleNextClick = () => {
     // Validate all required fields
-    const errors = {};
     const requiredFields = [
       'isHomeowner', 
       'receivingBenefits', 
@@ -67,23 +125,31 @@ const Form = () => {
       'boilerAge'
     ];
     
-    let hasErrors = false;
-    requiredFields.forEach(field => {
-      if (!formData[field]) {
-        errors[field] = `This field is required`;
-        hasErrors = true;
-      }
-    });
+    const { errors, hasErrors, errorMessage } = validateFields(requiredFields);
     
     if (hasErrors) {
       setFormErrors(errors);
-      // Scroll to the first error field
-      document.querySelector('.invalid\\:border-red-500').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
+      setSubmissionStatus({
+        type: 'error',
+        message: errorMessage
       });
+      
+      // Scroll to the first error field
+      const firstErrorField = document.querySelector('.border-red-500');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        // Focus on the first error field to highlight the issue
+        firstErrorField.focus();
+      }
       return;
     }
+    
+    // Clear any previous error messages
+    setFormErrors({});
+    setSubmissionStatus({type: '', message: ''});
     
     // If no errors, proceed to the next step
     setFormStep(2);
@@ -93,30 +159,26 @@ const Form = () => {
     e.preventDefault();
     
     // Validate contact form fields
-    const errors = {};
     const contactFields = ['email', 'fullName', 'phoneNumber', 'address', 'postalCode'];
-    
-    let hasErrors = false;
-    contactFields.forEach(field => {
-      if (!formData[field]) {
-        errors[field] = `This field is required`;
-        hasErrors = true;
-      } else if (field === 'email' && !isValidEmail(formData.email)) {
-        errors.email = 'Please enter a valid email address';
-        hasErrors = true;
-      } else if (field === 'phoneNumber' && !isValidPhone(formData.phoneNumber)) {
-        errors.phoneNumber = 'Please enter a valid phone number';
-        hasErrors = true;
-      }
-    });
+    const { errors, hasErrors, errorMessage } = validateFields(contactFields);
     
     if (hasErrors) {
       setFormErrors(errors);
-      // Scroll to the first error field
-      document.querySelector('.border-red-500')?.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
+      setSubmissionStatus({
+        type: 'error',
+        message: errorMessage
       });
+      
+      // Scroll to the first error field
+      const firstErrorField = document.querySelector('.border-red-500');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        // Focus on the first error field to highlight the issue
+        firstErrorField.focus();
+      }
       return;
     }
     
@@ -177,9 +239,35 @@ const Form = () => {
     // Basic UK phone validation (adjust as needed)
     return /^(\+44|0)[0-9]{10,11}$/.test(phone.replace(/\s+/g, ''));
   };
+  
+  // Shared validation function for both form steps
+  const validateFields = (fields) => {
+    const errors = {};
+    let hasErrors = false;
+    let errorMessage = '';
+    
+    fields.forEach(field => {
+      if (!formData[field]) {
+        errors[field] = `This field is required`;
+        hasErrors = true;
+      } else if (field === 'email' && !isValidEmail(formData.email)) {
+        errors.email = 'Please enter a valid email address';
+        hasErrors = true;
+      } else if (field === 'phoneNumber' && !isValidPhone(formData.phoneNumber)) {
+        errors.phoneNumber = 'Please enter a valid phone number';
+        hasErrors = true;
+      }
+    });
+    
+    if (hasErrors) {
+      errorMessage = `Please fill in all required fields correctly before ${fields.includes('email') ? 'submitting' : 'proceeding'}.`;
+    }
+    
+    return { errors, hasErrors, errorMessage };
+  };
 
   return (
-    <section className="relative w-full py-12 md:py-20 overflow-hidden">
+    <section className="relative w-full py-12 md:py-20 mt-20 md:mt-0 overflow-hidden">
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <div className="relative w-full h-full">
@@ -194,137 +282,100 @@ const Form = () => {
       </div>
 
       {/* Form card container */}
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-2xl mx-auto bg-[#14433C] rounded-3xl shadow-xl p-6 md:p-10">
+      <div className="container mx-auto px-4 relative z-10 ">
+        <div className="max-w-2xl mx-auto bg-[#14433C] rounded-3xl shadow-xl p-6 md:p-10 ">
           <h2 className="text-white text-2xl md:text-3xl font-bold text-center mb-6">
             Find out if you are eligible for FREE<br />
             Energy & Insulation upgrades.
           </h2>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {formStep === 1 ? (
               <>
                 {/* Step 1: Eligibility Questions */}
                 <div className="space-y-6">
                   {/* Homeowner question */}
-                  <div className="space-y-2">
-                    <label className="text-white font-medium">Are you a Homeowner?</label>
-                    <div className="relative">
-                      <select 
-                        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.isHomeowner ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                        onChange={(e) => handleChange('isHomeowner', e.target.value)}
-                        value={formData.isHomeowner}
-                        required
-                      >
-                        <option value="">- Select -</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#14433C] w-5 h-5 pointer-events-none" />
-                      {formErrors.isHomeowner && (
-                        <p className="text-red-300 text-sm mt-1">{formErrors.isHomeowner}</p>
-                      )}
-                    </div>
-                  </div>
+                  <FormSelect
+                    label="Are you a Homeowner?"
+                    name="isHomeowner"
+                    options={[
+                      { value: "", label: "- Select -" },
+                      { value: "yes", label: "Yes" },
+                      { value: "no", label: "No" }
+                    ]}
+                    value={formData.isHomeowner}
+                    onChange={handleChange}
+                    error={formErrors.isHomeowner}
+                  />
 
                   {/* Benefits question */}
-                  <div className="space-y-2">
-                    <label className="text-white font-medium">Anyone In Your Household Receiving Benefits?</label>
-                    <div className="relative">
-                      <select 
-                        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.receivingBenefits ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                        onChange={(e) => handleChange('receivingBenefits', e.target.value)}
-                        value={formData.receivingBenefits}
-                        required
-                      >
-                        <option value="">- Select -</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#14433C] w-5 h-5 pointer-events-none" />
-                      {formErrors.receivingBenefits && (
-                        <p className="text-red-300 text-sm mt-1">{formErrors.receivingBenefits}</p>
-                      )}
-                    </div>
-                  </div>
+                  <FormSelect
+                    label="Anyone In Your Household Receiving Benefits?"
+                    name="receivingBenefits"
+                    options={[
+                      { value: "", label: "- Select -" },
+                      { value: "yes", label: "Yes" },
+                      { value: "no", label: "No" }
+                    ]}
+                    value={formData.receivingBenefits}
+                    onChange={handleChange}
+                    error={formErrors.receivingBenefits}
+                  />
 
                   {/* Means Tested Benefits - always shown */}
-                  <div className="space-y-2">
-                    <label className="text-white font-medium">
-                      Is Anyone In Your Household In Receipt of Means Tested Benefits Such As:
-                    </label>
-                    <div className="relative">
-                      <select 
-                        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.meansTestedBenefits ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                        onChange={(e) => handleChange('meansTestedBenefits', e.target.value)}
-                        value={formData.meansTestedBenefits}
-                        required
-                      >
-                        <option value="">- Select -</option>
-                        <option value="universal credit">Universal Credit</option>
-                        <option value="working tax credit">Working Tax Credit</option>
-                        <option value="child tax credit">Child Tax Credit</option>
-                        <option value="income support">Income Support</option>
-                        <option value="jobseekers allowance">Jobseekers Allowance</option>
-                        <option value="employment support allowance">Income Based Employment & Support Allowance</option>
-                        <option value="housing benefits">Housing Benefits</option>
-                        <option value="pension credit">Pension Credit</option>
-                        <option value="child benefits">Child Benefits</option>
-                        <option value="none">None of Above</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#14433C] w-5 h-5 pointer-events-none" />
-                      {formErrors.meansTestedBenefits && (
-                        <p className="text-red-300 text-sm mt-1">{formErrors.meansTestedBenefits}</p>
-                      )}
-                    </div>
-                  </div>
+                  <FormSelect
+                    label="Is Anyone In Your Household In Receipt of Means Tested Benefits Such As:"
+                    name="meansTestedBenefits"
+                    options={[
+                      { value: "", label: "- Select -" },
+                      { value: "universal credit", label: "Universal Credit" },
+                      { value: "working tax credit", label: "Working Tax Credit" },
+                      { value: "child tax credit", label: "Child Tax Credit" },
+                      { value: "income support", label: "Income Support" },
+                      { value: "jobseekers allowance", label: "Jobseekers Allowance" },
+                      { value: "employment support allowance", label: "Income Based Employment & Support Allowance" },
+                      { value: "housing benefits", label: "Housing Benefits" },
+                      { value: "pension credit", label: "Pension Credit" },
+                      { value: "child benefits", label: "Child Benefits" },
+                      { value: "none", label: "None of Above" }
+                    ]}
+                    value={formData.meansTestedBenefits}
+                    onChange={handleChange}
+                    error={formErrors.meansTestedBenefits}
+                  />
 
                   {/* Home Supply - always shown */}
-                  <div className="space-y-2">
-                    <label className="text-white font-medium">Is Your Home Supplied With:</label>
-                    <div className="relative">
-                      <select 
-                        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.homeSuppliedWith ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                        onChange={(e) => handleChange('homeSuppliedWith', e.target.value)}
-                        value={formData.homeSuppliedWith}
-                        required
-                      >
-                        <option value="">- Select -</option>
-                        <option value="gas">Gas</option>
-                        <option value="electricity">Electricity</option>
-                        <option value="lpg">LPG</option>
-                        <option value="none">None of Above</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#14433C] w-5 h-5 pointer-events-none" />
-                      {formErrors.homeSuppliedWith && (
-                        <p className="text-red-300 text-sm mt-1">{formErrors.homeSuppliedWith}</p>
-                      )}
-                    </div>
-                  </div>
+                  <FormSelect
+                    label="Is Your Home Supplied With:"
+                    name="homeSuppliedWith"
+                    options={[
+                      { value: "", label: "- Select -" },
+                      { value: "gas", label: "Gas" },
+                      { value: "electricity", label: "Electricity" },
+                      { value: "lpg", label: "LPG" },
+                      { value: "none", label: "None of Above" }
+                    ]}
+                    value={formData.homeSuppliedWith}
+                    onChange={handleChange}
+                    error={formErrors.homeSuppliedWith}
+                  />
 
                   {/* Boiler Age - always shown */}
-                  <div className="space-y-2">
-                    <label className="text-white font-medium">How Old Is Your Boiler?</label>
-                    <div className="relative">
-                      <select 
-                        className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.boilerAge ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                        onChange={(e) => handleChange('boilerAge', e.target.value)}
-                        value={formData.boilerAge}
-                        required
-                      >
-                        <option value="">- Select -</option>
-                        <option value="over-10-years">Over 10 Years</option>
-                        <option value="over-15-years">Over 15 Years</option>
-                        <option value="over-20-years">Over 20 Years</option>
-                        <option value="no-boiler">I Do not Have a Boiler</option>
-                        <option value="none">None of Above</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#14433C] w-5 h-5 pointer-events-none" />
-                      {formErrors.boilerAge && (
-                        <p className="text-red-300 text-sm mt-1">{formErrors.boilerAge}</p>
-                      )}
-                    </div>
-                  </div>
+                  <FormSelect
+                    label="How Old Is Your Boiler?"
+                    name="boilerAge"
+                    options={[
+                      { value: "", label: "- Select -" },
+                      { value: "over-10-years", label: "Over 10 Years" },
+                      { value: "over-15-years", label: "Over 15 Years" },
+                      { value: "over-20-years", label: "Over 20 Years" },
+                      { value: "no-boiler", label: "I Do not Have a Boiler" },
+                      { value: "none", label: "None of Above" }
+                    ]}
+                    value={formData.boilerAge}
+                    onChange={handleChange}
+                    error={formErrors.boilerAge}
+                  />
 
                   {/* Next button for eligibility form */}
                   <div className="pt-4 flex justify-end">
@@ -338,12 +389,8 @@ const Form = () => {
                   </div>
                   
                   {/* General validation error message */}
-                  {Object.keys(formErrors).length > 0 && (
-                    <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded-lg">
-                      <p className="text-white text-sm">
-                        Please fill in all required fields before proceeding.
-                      </p>
-                    </div>
+                  {submissionStatus.message && (
+                    <FormMessage type={submissionStatus.type} message={submissionStatus.message} />
                   )}
                 </div>
               </>
@@ -357,89 +404,59 @@ const Form = () => {
                   </h3>
                   
                   {/* Email */}
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-white font-medium">Email</label>
-                    <input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.email ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      required
-                    />
-                    {formErrors.email && (
-                      <p className="text-red-300 text-sm mt-1">{formErrors.email}</p>
-                    )}
-                  </div>
+                  <FormInput 
+                    label="Email"
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={formErrors.email}
+                  />
                   
                   {/* Full Name */}
-                  <div className="space-y-2">
-                    <label htmlFor="fullName" className="text-white font-medium">Full Name</label>
-                    <input
-                      id="fullName"
-                      type="text"
-                      placeholder="Enter your full name"
-                      className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.fullName ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                      value={formData.fullName}
-                      onChange={(e) => handleChange('fullName', e.target.value)}
-                      required
-                    />
-                    {formErrors.fullName && (
-                      <p className="text-red-300 text-sm mt-1">{formErrors.fullName}</p>
-                    )}
-                  </div>
+                  <FormInput 
+                    label="Full Name"
+                    id="fullName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    error={formErrors.fullName}
+                  />
                   
                   {/* Phone Number */}
-                  <div className="space-y-2">
-                    <label htmlFor="phoneNumber" className="text-white font-medium">Phone Number</label>
-                    <input
-                      id="phoneNumber"
-                      type="tel"
-                      placeholder="Enter your phone number (e.g., 07123456789)"
-                      className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.phoneNumber ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                      value={formData.phoneNumber}
-                      onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                      required
-                    />
-                    {formErrors.phoneNumber && (
-                      <p className="text-red-300 text-sm mt-1">{formErrors.phoneNumber}</p>
-                    )}
-                  </div>
+                  <FormInput 
+                    label="Phone Number"
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="Enter your phone number (e.g., 07123456789)"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    error={formErrors.phoneNumber}
+                  />
                   
                   {/* Address */}
-                  <div className="space-y-2">
-                    <label htmlFor="address" className="text-white font-medium">Address</label>
-                    <input
-                      id="address"
-                      type="text"
-                      placeholder="Enter your address"
-                      className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.address ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                      value={formData.address}
-                      onChange={(e) => handleChange('address', e.target.value)}
-                      required
-                    />
-                    {formErrors.address && (
-                      <p className="text-red-300 text-sm mt-1">{formErrors.address}</p>
-                    )}
-                  </div>
+                  <FormInput 
+                    label="Address"
+                    id="address"
+                    type="text"
+                    placeholder="Enter your address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    error={formErrors.address}
+                  />
                   
                   {/* Postal Code */}
-                  <div className="space-y-2">
-                    <label htmlFor="postalCode" className="text-white font-medium">Postal Code</label>
-                    <input
-                      id="postalCode"
-                      type="text"
-                      placeholder="Enter your postal code"
-                      className={`w-full py-3 px-4 bg-white text-[#14433C] rounded-lg focus:outline-none focus:ring-2 focus:ring-white border-2 ${formErrors.postalCode ? 'border-red-500' : 'border-transparent'} focus:border-red-500 invalid:border-red-500`}
-                      value={formData.postalCode}
-                      onChange={(e) => handleChange('postalCode', e.target.value)}
-                      required
-                    />
-                    {formErrors.postalCode && (
-                      <p className="text-red-300 text-sm mt-1">{formErrors.postalCode}</p>
-                    )}
-                  </div>
+                  <FormInput 
+                    label="Postal Code"
+                    id="postalCode"
+                    type="text"
+                    placeholder="Enter your postal code"
+                    value={formData.postalCode}
+                    onChange={handleChange}
+                    error={formErrors.postalCode}
+                  />
                   
                   {/* Submit button */}
                   <div className="pt-4 flex justify-end">
@@ -462,30 +479,9 @@ const Form = () => {
                     </button>
                   </div>
                   
-                  {/* Form messages */}
-                  {Object.keys(formErrors).length > 0 && (
-                    <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded-lg">
-                      <p className="text-white text-sm">
-                        Please fill in all required fields correctly before submitting.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {/* Submission status messages */}
-                  {submissionStatus.type === 'success' && (
-                    <div className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded-lg">
-                      <p className="text-white text-sm font-medium">
-                        {submissionStatus.message}
-                      </p>
-                    </div>
-                  )}
-                  
-                  {submissionStatus.type === 'error' && (
-                    <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded-lg">
-                      <p className="text-white text-sm">
-                        {submissionStatus.message}
-                      </p>
-                    </div>
+                  {/* Form messages - unified for all message types */}
+                  {submissionStatus.message && (
+                    <FormMessage type={submissionStatus.type} message={submissionStatus.message} />
                   )}
                 </div>
               </>
