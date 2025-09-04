@@ -60,17 +60,18 @@ export async function addFormDataToGoogleSheet(formData) {
     // Create row values based on form data
     const values = [
       [
+        "meta",
         submissionDate,
-        formData.fullName,
-        formData.email,
-        formData.phoneNumber,
-        formData.address,
-        formData.postalCode,
         formData.isHomeowner,
         formData.receivingBenefits,
         formData.meansTestedBenefits || 'N/A',
         formData.homeSuppliedWith || 'N/A',
-        formData.boilerAge || 'N/A'
+        formData.boilerAge || 'N/A',
+        formData.email,
+        formData.fullName,
+        formData.phoneNumber,
+        formData.address,
+        formData.postalCode,
       ]
     ];
 
