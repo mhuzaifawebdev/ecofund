@@ -55,8 +55,8 @@ export async function addFormDataToGoogleSheet(formData) {
     console.log('Using sheet:', sheetName);
 
     // Format date
-    const submissionDate = new Date().toISOString();
-    
+    const submissionDate = new Date().toISOString().slice(0, 10);
+
     // Create row values based on form data
     const values = [
       [
