@@ -13,12 +13,12 @@ const Footer = () => {
               Choose us for warmth and savings, as ECO4 brings free energy solutions to your doorstep, making homes efficient and comfortable.
             </p>
             <div className="flex space-x-4">
-              <a href="#" aria-label="Facebook" className="transition-colors">
+              <a href="#" className="transition-colors">
                 <div className="w-8 h-8 bg-[#2c5650] rounded-full flex items-center justify-center hover:bg-[#244944] transition-colors">
                   <Facebook className="w-4 h-4 text-white" />
                 </div>
               </a>
-              <a href="#" aria-label="Instagram" className="transition-colors">
+              <a href="#" className="transition-colors">
                 <div className="w-8 h-8 bg-[#2c5650] rounded-full flex items-center justify-center hover:bg-[#244944] transition-colors">
                   <Instagram className="w-4 h-4 text-white" />
                 </div>
@@ -58,7 +58,7 @@ const Footer = () => {
 
         <div className="border-t border-[#2c5650] mt-8 pt-6">
           <p className="text-gray-300 text-sm text-center">
-            © 2024 Ecolite Energy Solutions. All rights reserved.
+            Copyright © 2024 Ecolite Energy Solutions, All rights reserved.
           </p>
         </div>
       </div>
