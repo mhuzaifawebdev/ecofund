@@ -337,7 +337,7 @@ const Form = () => {
                       { value: "housing benefits", label: "Housing Benefits" },
                       { value: "pension credit", label: "Pension Credit" },
                       { value: "child benefits", label: "Child Benefits" },
-                      { value: "none", label: "None of Above" }
+                      { value: "None of Above", label: "None of Above" }
                     ]}
                     value={formData.meansTestedBenefits}
                     onChange={handleChange}
@@ -353,7 +353,7 @@ const Form = () => {
                       { value: "gas", label: "Gas" },
                       { value: "electricity", label: "Electricity" },
                       { value: "lpg", label: "LPG" },
-                      { value: "none", label: "None of Above" }
+                      { value: "None of Above", label: "None of Above" }
                     ]}
                     value={formData.homeSuppliedWith}
                     onChange={handleChange}
@@ -370,7 +370,7 @@ const Form = () => {
                       { value: "over-15-years", label: "Over 15 Years" },
                       { value: "over-20-years", label: "Over 20 Years" },
                       { value: "no-boiler", label: "I Do not Have a Boiler" },
-                      { value: "none", label: "None of Above" }
+                      { value: "None of Above", label: "None of Above" }
                     ]}
                     value={formData.boilerAge}
                     onChange={handleChange}
